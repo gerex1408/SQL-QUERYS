@@ -44,19 +44,11 @@ LEFT OUTER JOIN Acompanyants r ON a.codi=r.familiar
 ORDER BY v.codi;
 
 --50
-SELECT p.nom, p.cognoms 
+SELECT DISTINCT p.nom, p.cognoms 
 FROM Pacients p JOIN Visites v ON v.pacient=p.codi
 JOIN ProfessionalsVisita pv ON v.codi=pv.visita
-WHERE pv.personal= (SELECT pv.personal FROM ProfessionalsVisita pv
+WHERE pv.personal IN (SELECT pv.personal FROM ProfessionalsVisita pv
 JOIN Visites v ON v.codi=pv.visita
 JOIN Pacients p ON p.codi=v.pacient
 WHERE p.nom='Ariadna' and p.cognoms= 'Pi Petit');
 
---51
-SELECT mp.descripcio, t.descripcio, MAX(r.grauRebuig)
-FROM ModelsProtesis mp JOIN Protesis p ON mp.codi=p.model
-JOIN Intervencions i ON p.numSerie=i.protesi
-JOIN Revisions r ON r.intervencio=i.codi
-JOIN TipologiesProtesis t ON t.codi=mp.tipus
-GROUP BY mp.codi
-ORDER BY t.descripcio ASC, MAX(r.grauRebuig) DESC; 
