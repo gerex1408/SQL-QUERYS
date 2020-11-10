@@ -73,3 +73,53 @@ JOIN Visites v ON v.codi=pv.visita
 JOIN Pacients p ON p.codi=v.pacient
 WHERE p.nom='Ariadna' and p.cognoms= 'Pi Petit');
 
+--51
+SELECT tp.descripcio, mp.descripcio, MAX(r.grauRebuig)
+FROM Revisions r JOIN Intervencions i ON r.intervencio=i.codi
+JOIN Protesis p ON i.protesi=p.numSerie
+JOIN ModelsProtesis mp ON p.model=mp.codi
+JOIN TipologiesProtesis tp ON mp.tipus=tp.codi
+GROUP BY tp.descripcio, mp.descripcio
+ORDER BY tp.descripcio, MAX(r.grauRebuig);
+
+--52
+SELECT p.nom AS nom, p.cognoms AS cognoms, pm.codi AS respo, i.data AS data
+FROM pacients p JOIN intervencions i ON p.codi = i.pacient
+JOIN PersonalMedic pm ON i.responsable = pm.codi
+WHERE pm.nom LIKE 'David'
+ORDER BY data DESC;
+
+--53
+SELECT p.nom AS nom, p.cognoms AS cognoms, pm.codi AS respo, i.data AS data, pm.nom||' '||pm.cognoms as nomMetge, months_between(pm.dataAlta,i.data)
+FROM pacients p JOIN intervencions i ON p.codi = i.pacient
+JOIN PersonalMedic pm ON i.responsable = pm.codi
+WHERE pm.nom LIKE 'David'
+ORDER BY data DESC;
+
+--54
+SELECT p.CODI, p.DNI, p.GENERE, p.NOM, p.COGNOMS, p.ADRECA, p.CODIPOSTAL as CODIP, p.POBLACIO, p.EMAIL, p.TELEFON, p.TIPOLOGIAPROFESSIONAL as TIPOLOGIAP, p.SOU, p.DD_LAT
+FROM PERSONALMEDIC p
+WHERE ((SELECT count(INTERVENCIO) FROM PROFESSIONALSINTERVENCIO WHERE p.CODI = PERSONAL GROUP BY PERSONAL) < 5) and (p.TIPOLOGIAPROFESSIONAL = 'DOC' or p.TIPOLOGIAPROFESSIONAL = 'INF');
+
+--56
+select trunc(((current_date-p.dataNaixement)/365)/10)*10 as agrupats, count(*)
+from Intervencions i JOIN Pacients p ON i.pacient=p.codi
+group by trunc(((current_date-p.dataNaixement)/365)/10)*10
+order by agrupats desc;
+
+--58
+SELECT pm.nom, pm.cognoms, pm.sou, tipologiaprofessional,
+(SELECT AVG(sou) 
+FROM personalmedic p
+GROUP BY tipologiaprofessional
+HAVING pm.tipologiaprofessional=p.tipologiaprofessional) 
+AS SOUMITJATIPOLOGA
+FROM personalmedic pm
+WHERE pm.sou>=
+(SELECT avg(sou) 
+FROM personalmedic p
+GROUP BY tipologiaprofessional
+HAVING pm.tipologiaprofessional=p.tipologiaprofessional);
+
+
+
