@@ -123,3 +123,57 @@ HAVING pm.tipologiaprofessional=p.tipologiaprofessional);
 
 
 
+--1
+select PROF_NOM,PROF_COGNOM_1,PROF_COGNOM_2  from PROFESSOR 
+where PROF_DATA_NAIXEMENT=  (select max(PROF_DATA_NAIXEMENT) from PROFESSOR );
+
+--2
+SELECT assig_curs, assig_semestre, assig_nom, assig_credits
+FROM Assignatures
+ORDER BY assig_curs, assig_semestre, assig_credits DESC;
+
+--3
+SELECT assig_nom, assig_credits 
+FROM Assignatures JOIN Matricula ON assig_codi=matr_assig_codi
+where matr_alum_dni=111;
+
+--4
+SELECT prof_nom||' '||prof_cognom_1||' '||PROF_COGNOM_2 as professor
+FROM Professor JOIN Departament ON prof_dept_codi=dept_codi
+WHERE dept_ubicacio LIKE 'POLITECNICA%' and floor(months_between(current_date,PROF_DATA_NAIXEMENT)/12)>50;
+
+--5
+SELECT ASSIGNATURES.ASSIG_NOM, ALUMNES.ALUMN_NOM FROM ASSIGNATURES 
+JOIN MATRICULA ON ASSIGNATURES.ASSIG_CODI=MATRICULA.MATR_ASSIG_CODI
+JOIN ALUMNES ON ALUMNES.ALUMN_DNI= MATRICULA.MATR_ALUM_DNI
+WHERE ASSIG_CODI 
+IN(SELECT ASSIGPROF_ASSIG_CODI
+    FROM ASSIGNATURES_PROFESSOR
+            WHERE ASSIGPROF_PROF_DNI IN 
+            (SELECT PROF_DNI FROM PROFESSOR  WHERE PROF_NOM='PERE' AND PROF_COGNOM_1='VIDAL'));
+
+--6
+SELECT prof_nom||' '||PROF_COGNOM_1||' '||PROF_COGNOM_2 as professor, assig_credits
+FROM Assignatures JOIN Professor ON prof_dni=assig_dni_professor_resp
+GROUP BY prof_nom||' '||PROF_COGNOM_1||' '||PROF_COGNOM_2,assig_credits
+HAVING count(*)<=2;
+
+--7
+SELECT alumn_nom, alumn_cognom_1, alumn_cognom_2, alumn_telefon
+FROM ALUMNES LEFT OUTER JOIN MATRICULA ON matr_alum_dni=alumn_dni
+GROUP BY alumn_nom, alumn_cognom_1, alumn_cognom_2,alumn_telefon
+HAVING count(matr_assig_codi)=0;
+
+--8
+select prof_dni,prof_cognom_1,prof_cognom_2,prof_telefon 
+from PROFESSOR 
+where PROF_DNI not in( select ASSIG_DNI_PROFESSOR_RESP from ASSIGNATURES );
+
+--9
+select matr_convocatoria,count(*)as N_Aprovats from assignatures a
+join Matricula m on m.matr_assig_codi=a.assig_codi
+where Assig_nom='ENGINYERIA DEL SOFTWARE I' and MATR_NOTA>=5
+group by matr_convocatoria;
+
+--10
+select PROF_NOM,PROF_COGNOM_1,PROF_COGNOM_2 from PROFESSOR where PROF_CODI_POSTAL is NULL
